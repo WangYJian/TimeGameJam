@@ -11,14 +11,20 @@ namespace Script {
         public float mapRadius = 4; // 地图的半径
         public GameObject[] blockPrefab; // 地图的方块预制体
         public GameObject[] MapBlocks; // 地图的方块信息
+        // 地图类型字典
+        public Dictionary<int, int> mapType = new Dictionary<int, int>() {
+            {0, 0},
+            {7, 1},
+        };
         
-        
-        // 玩家预制体
-        public GameObject[] playerPrefab;
-        public GameObject[] players; // 玩家
-        public int[] playerPosition; // 玩家初始位置
-        public Player[] playerScript; // 玩家的脚本
-        
+        public GameObject[] playerPrefab; // 玩家预制体
+        public GameObject[] players; // 玩家对象
+        public int[] playerInitPosition = {0, 20}; // 玩家初始化位置
+        // 玩家脚本
+        public Player playerScript;
+        public Player2 player2Script;
+
+
         // 摄像头脚本
         public CameraView cameraView;
         
@@ -38,21 +44,20 @@ namespace Script {
             // 获取摄像机角度
             float cameraAngle = cameraView.angle;
             nowAngle = cameraAngle;
-            // 获取玩家脚本
-            playerScript = new Player[playerPrefab.Length];
-            for (int i = 0; i < playerPrefab.Length; i++) {
-                playerScript[i] = playerPrefab[i].GetComponent<Player>();
-            }
             // 初始化地图
             for (int i = 0; i < mapSize; i++) {
+                // 如果在字典中，则给类型赋值
+                int type1 = 0, type2 = 0;
+                mapType.TryGetValue(i, out type1);
+                mapType.TryGetValue(i + mapSize, out type2);
                 // 计算弧度
                 float radian = Mathf.PI * 2 / mapSize * i;
                 // 获取位置和旋转信息
                 Vector3 position = mapRing.GetPositionOnMobiusRing(radian);
                 Quaternion rotation = mapRing.GetRotationOnMobiusRing(radian);
                 // 实例化方块
-                MapBlocks[i] = Instantiate(blockPrefab[0], transform);
-                MapBlocks[i + mapSize] = Instantiate(blockPrefab[0], transform);
+                MapBlocks[i] = Instantiate(blockPrefab[type1], transform);
+                MapBlocks[i + mapSize] = Instantiate(blockPrefab[type2], transform);
                 // 设置方块位置和旋转
                 MapBlocks[i].transform.localPosition = position;
                 MapBlocks[i].transform.localRotation = rotation * Quaternion.Euler(nowAngle / 2, 0, 0);
@@ -63,29 +68,24 @@ namespace Script {
                 MapBlock mapBlockScript2 = MapBlocks[i + mapSize].GetComponent<MapBlock>();
                 // 设置方块信息
                 mapBlockScript1.index = i;
-                mapBlockScript1.type = 0;
+                mapBlockScript1.type = type1;
                 mapBlockScript2.index = i + mapSize;
-                mapBlockScript2.type = 0;
+                mapBlockScript2.type = type2;
             }
             
-            
-            // 初始化玩家
-            players = new GameObject[playerPrefab.Length];
-            for (int i = 0; i < playerPrefab.Length; i++) {
-                // 获取玩家位置信息
-                Vector3 position = mapRing.GetPositionOnMobiusRing(Mathf.PI * 2 / mapSize * playerPosition[i]);
-                Quaternion rotation = mapRing.GetRotationOnMobiusRing(Mathf.PI * 2 / mapSize * playerPosition[i] - cameraAngle);
-                // 实例化玩家
-                players[i] = Instantiate(playerPrefab[i], transform);
-                // 设置玩家位置和旋转
-                players[i].transform.position = position;
-                players[i].transform.rotation = rotation;
-                // 获取玩家脚本
-                Player playerScript = players[i].GetComponent<Player>();
-                // 设置玩家信息
-                playerScript.position = playerPosition[i];
-            }
-            
+            players = new GameObject[2];
+            // 初始化玩家1
+            players[0] = Instantiate(playerPrefab[0], transform);
+            playerScript = players[0].GetComponent<Player>();
+            players[0].transform.localPosition = MapBlocks[playerInitPosition[0]].transform.localPosition;
+            players[0].transform.localRotation = MapBlocks[playerInitPosition[0]].transform.localRotation;
+            playerScript.position = playerInitPosition[0];
+            // 初始化玩家2
+            players[1] = Instantiate(playerPrefab[1], transform);
+            player2Script = players[1].GetComponent<Player2>();
+            players[1].transform.localPosition = MapBlocks[playerInitPosition[1]].transform.localPosition;
+            players[1].transform.localRotation = MapBlocks[playerInitPosition[1]].transform.localRotation;
+            player2Script.position = playerInitPosition[1];
 
             // 初始化地图
             RotateMap(cameraView.angle);
@@ -120,7 +120,33 @@ namespace Script {
                 MapBlocks[i + mapSize].transform.localPosition = position;
                 MapBlocks[i + mapSize].transform.localRotation = rotation * Quaternion.Euler( -nowAngle / 2, 180,  180);
             }
-
+        }
+        
+        // 改变某个板块的类型
+        public void ChangeBlockType(int index, int type) {
+            // 删除原来的板块
+            Destroy(MapBlocks[index]);
+            // 实例化新的板块
+            MapBlocks[index] = Instantiate(blockPrefab[type], transform);
+            // 计算弧度
+            float radian = Mathf.PI * 2 / mapSize * (index % mapSize);
+            // 获取位置和旋转信息
+            MobiusRing mapRing = new Utils.MobiusRing(mapSize, mapRadius);
+            Vector3 position = mapRing.GetPositionOnMobiusRing(radian);
+            Quaternion rotation = mapRing.GetRotationOnMobiusRing(radian);
+            // 设置方块位置和旋转
+            MapBlocks[index].transform.localPosition = position;
+            if (index < mapSize) {
+                MapBlocks[index].transform.localRotation = rotation * Quaternion.Euler( nowAngle / 2, 0, 0);
+            } else {
+                MapBlocks[index].transform.localRotation = rotation * Quaternion.Euler( -nowAngle / 2, 180,  180);
+            }
+            // 获取方块脚本
+            MapBlock mapBlockScript = MapBlocks[index].GetComponent<MapBlock>();
+            // 设置方块信息
+            mapBlockScript.index = index;
+            mapBlockScript.type = type;
+            playerScript.mapBlocks[index] = mapBlockScript;
         }
     }
 

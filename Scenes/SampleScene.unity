@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028326, g: 0.22571333, b: 0.30692202, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -353,12 +353,15 @@ MonoBehaviour:
   mapRadius: 4
   blockPrefab:
   - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: f47b15627a8e647a1955b9e19d58034a, type: 3}
   MapBlocks: []
   playerPrefab:
   - {fileID: 1853498840253081709, guid: c45342260ed4b4929abc02638fbfcbb8, type: 3}
+  - {fileID: 1853498840253081709, guid: 7d2e1d4f41cdd49f093f09519de53833, type: 3}
   players: []
-  playerPosition: 00000000
-  playerScript: []
+  playerInitPosition: 0000000014000000
+  playerScript: {fileID: 0}
+  player2Script: {fileID: 0}
   cameraView: {fileID: 0}
   nowAngle: 0
   selectedBlock: -1

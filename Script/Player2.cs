@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using Utils;
 
-public class Player : MonoBehaviour
+public class Player2 : MonoBehaviour
 {
     public int position = 0;     // 当前位置
     public bool isMoving = false; // 是否在移动
@@ -15,7 +15,9 @@ public class Player : MonoBehaviour
     public List<MapBlock> mapBlocks = new List<MapBlock>(); // 所有位置的脚本
     public CameraView cameraView; // 摄像机视角
     public int maxMoveDistance = 6;
-    public List<int> movePath = new List<int>();
+    public int nowPath = 0; // 目前所在的路径
+    public Player playerScript; // 玩家1的脚本
+    public int frozenRound = 0; // 冰冻回合数
 
     // 移动需要的参数
     public float angle;
@@ -26,9 +28,7 @@ public class Player : MonoBehaviour
     public float nowTime;
     public MobiusRing mapRing;
     
-    // 副玩家脚本
-    public Player2 player2Script;
-
+    
     void Start()
     {
         // 获取Map脚本
@@ -40,9 +40,9 @@ public class Player : MonoBehaviour
         }
         // 获取摄像机视角
         cameraView = Camera.main.GetComponent<CameraView>();
-        movePath.Add(position);
-        // 获取副玩家脚本
-        player2Script = mapScript.players[1].GetComponent<Player2>();
+        nowPath = 0;
+        // 获取玩家1的脚本
+        playerScript = mapScript.players[0].GetComponent<Player>();
     }
 
     // Update is called once per frame
@@ -94,36 +94,32 @@ public class Player : MonoBehaviour
             {
                 isMoving = false;
                 flag = true;
-                // 通过当前位置的板块类型判断触发事件
-                switch (mapBlocks[position].type)
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        // 如果是冰块，冻结副玩家
-                        Freeze();
-                        break;
-                }
-
             }
         }
     }
     
     // 移动到指定位置
-    public void MoveTo(int position)
+    public void Move()
     {
+        // 如果冰冻回合数大于0，减少冰冻回合数
+        if (frozenRound > 0)
+        {
+            frozenRound--;
+            return;
+        }
         // 计算最近距离
-        int distance = position - this.position;
+        int distance = playerScript.movePath[nowPath + 1] - playerScript.movePath[nowPath];
         // 如果距离大于一半
         if (Mathf.Abs(distance) > mapScript.mapSize)
         {
             distance = distance > 0 ? distance - 2 * mapScript.mapSize : distance + 2 * mapScript.mapSize;
         }
-        // 如果距离大于最大移动距离，不移动
-        if (Mathf.Abs(distance) > maxMoveDistance)
+        int position = (this.position + distance) % (2 * mapScript.mapSize);
+        if (position < 0)
         {
-            return;
+            position += 2 * mapScript.mapSize;
         }
+
         //计算移动时间
         time = Mathf.Abs(distance) * 0.5f;
         // 目前位置对应的角度
@@ -132,22 +128,10 @@ public class Player : MonoBehaviour
         targetAngle = Mathf.PI * 2 / mapScript.mapSize * position;
         // 旋转
         isMoving = true;
+        // 更新位置
         this.position = position;
-        movePath.Add(position);
-        // 让副玩家移动
-        player2Script.Move();
+        // 更新路径
+        nowPath++;
     }
-    
-    // 冻结事件
-    public void Freeze()
-    {
-        // 将玩家2冻结
-        player2Script.frozenRound = 2;
-        // 将当前位置的板块恢复类型
-        mapScript.ChangeBlockType(position, 0);
-    }
-    
-    
-    
 
 }
