@@ -17,7 +17,8 @@ public class Player2 : MonoBehaviour
     public int maxMoveDistance = 6;
     public int nowPath = 0; // 目前所在的路径
     public Player playerScript; // 玩家1的脚本
-    public int frozenRound = 0; // 冰冻回合数
+    public int frozenRound = 0; // 延迟回合数
+    public int stopRound = 0; // 停止回合数
 
     // 移动需要的参数
     public float angle;
@@ -105,6 +106,13 @@ public class Player2 : MonoBehaviour
         if (frozenRound > 0)
         {
             frozenRound--;
+            return;
+        }
+        // 如果停止回合数大于0，减少停止回合数
+        if (stopRound > 0)
+        {
+            stopRound--;
+            nowPath++;
             return;
         }
         // 计算最近距离

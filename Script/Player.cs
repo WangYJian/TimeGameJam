@@ -100,8 +100,12 @@ public class Player : MonoBehaviour
                     case 0:
                         break;
                     case 1:
-                        // 如果是冰块，冻结副玩家
-                        Freeze();
+                        // 如果是延迟事件，将玩家2延迟二回合
+                        Freeze(2);
+                        break;
+                    case 2:
+                        // 如果是加事件，将玩家2停止一回合，玩家1移动两个位置
+                        AddOrSub(2, true);
                         break;
                 }
 
@@ -138,16 +142,45 @@ public class Player : MonoBehaviour
         player2Script.Move();
     }
     
-    // 冻结事件
-    public void Freeze()
+    // 延迟事件
+    public void Freeze(int num)
     {
         // 将玩家2冻结
-        player2Script.frozenRound = 2;
+        player2Script.frozenRound = num;
         // 将当前位置的板块恢复类型
         mapScript.ChangeBlockType(position, 0);
     }
     
-    
-    
+    // 加减事件
+    public void AddOrSub(int num, bool isAdd)
+    {
+        // 如果是加事件
+        if (isAdd)
+        {
+            // 将玩家2停止1回合
+            player2Script.frozenRound = 1;
+            // 玩家1移动num个位置
+            MoveTo((position + num) % (2 * mapScript.mapSize));
+        }
+        else
+        {
+            // 将玩家2停止1回合
+            player2Script.frozenRound = 1;
+            // 玩家1移动num个位置
+            int toPosition = position - num;
+            if (toPosition < 0)
+            {
+                toPosition += 2 * mapScript.mapSize;
+            }
+            MoveTo(toPosition);
+        }
+        
+        // 将当前位置的板块恢复类型
+        mapScript.ChangeBlockType(position, 0);
+    }
+
+
+
+
 
 }
