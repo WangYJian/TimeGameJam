@@ -51,10 +51,17 @@ public class MapBlock : MonoBehaviour {
     // 鼠标点击事件
     private void OnMouseDown()
     {
+        
         // 获取父物体的脚本
         Map mapScript = transform.parent.GetComponent<Map>();
         // 获取玩家脚本
         Player playerScript = mapScript.players[0].GetComponent<Player>();
+        Player2 player2Script = mapScript.players[1].GetComponent<Player2>();
+        // 如果玩家正在移动，不执行
+        if (playerScript.status != 0 || player2Script.status != 0)
+        {
+            return;
+        }
         // 查看是否有方块被选中
         if (mapScript.selectedBlock == -1)
         {
@@ -69,25 +76,28 @@ public class MapBlock : MonoBehaviour {
         }
         else
         {
-            // 如果被选中的方块是当前方块，则取消选中
-            if (mapScript.selectedBlock == index)
+            // 如果被选中的方块不是当前方块，先判断距离是否小于最大距离，如果是则移动
+            int distance = Math.Abs(mapScript.selectedBlock - index);
+            if (distance > mapScript.mapSize)
             {
-                mapScript.selectedBlock = -1;
-                // 标记为白色
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
+                distance = 2 * mapScript.mapSize - distance;
             }
-            else
+            if (distance <= playerScript.maxMoveDistance)
             {
-                // 如果被选中的方块不是当前方块，则将玩家移动到当前方块
-                playerScript.MoveTo(index);
-                // 将被选中的方块标记为白色
-                mapScript.MapBlocks[mapScript.selectedBlock].transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
-                // 取消选中
-                mapScript.selectedBlock = -1;
+                // 移动
+               playerScript.MoveTo(index);
+                // 减少回合数
+                mapScript.nowRound--;
+                // 如果回合数为0，失败
+                if (mapScript.nowRound == 0)
+                {
+                    mapScript.GameOver();
+                }
             }
+            // 将被选中的方块标记为白色
+            mapScript.MapBlocks[mapScript.selectedBlock].transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
+            // 取消选中
+            mapScript.selectedBlock = -1;
         }
-        
     }
-    
-    
 }

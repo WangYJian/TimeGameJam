@@ -1,21 +1,42 @@
-using System.Collections;
+using System;
+using System.IO;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Utils;
 
+public struct MapSetting {
+    // 地图的格数和半径
+    public int MapSize;
+    public float MapRadius;
+    // 玩家初始化位置
+    public int[] PlayerInitPosition;
+    // 地图类型字典
+    public int[] MapType;
+    // 最大回合数
+    public int MaxRound;
+    // 延迟时间
+    public int DelayTime;
+}
+
 namespace Script {
     public class Map : MonoBehaviour {
+        //胜利事件
+        public bool isWin = false;
+        public bool isLose = false;
+        
+        // 最大回合数
+        public int maxRound = 10;
+        // 当前回合数
+        public int nowRound = 0;
+        
         public int mapSize = 15; // 地图的格数
         public float mapRadius = 4; // 地图的半径
         public GameObject[] blockPrefab; // 地图的方块预制体
         public GameObject[] MapBlocks; // 地图的方块信息
         // 地图类型字典
-        public Dictionary<int, int> mapType = new Dictionary<int, int>() {
-            {3, 4},
-            {7, 2}
-        };
+        public Dictionary<int, int> mapType = new Dictionary<int, int>() { };
         // 延迟时间
         public int delayTime = 1;
         
@@ -25,7 +46,6 @@ namespace Script {
         // 玩家脚本
         public Player playerScript;
         public Player2 player2Script;
-
 
         // 摄像头脚本
         public CameraView cameraView;
@@ -37,8 +57,23 @@ namespace Script {
         
 
         void Start() {
+            // 读取json文件初始化
+            string json = File.ReadAllText("Assets/design/Setting.json");
+            // 将json文件转换为Map结构体
+            MapSetting mapSetting = JsonUtility.FromJson<MapSetting>(json);
+            // 初始化地图信息
+            mapSize = mapSetting.MapSize;
+            mapRadius = mapSetting.MapRadius;
+            playerInitPosition = mapSetting.PlayerInitPosition;
+            maxRound = mapSetting.MaxRound;
+            delayTime = mapSetting.DelayTime;
+            // 初始化地图类型字典,第一个为位置，第二个为类型
+            for (int i = 0; i < mapSetting.MapType.Length; i += 2) {
+                mapType.Add(mapSetting.MapType[i], mapSetting.MapType[i + 1]);
+            }
+            
             // 获取地图位置信息
-            MobiusRing mapRing = new Utils.MobiusRing(mapSize, mapRadius);
+            MobiusRing mapRing = new MobiusRing(mapSize, mapRadius);
             // 初始化方块信息数组
             MapBlocks = new GameObject[2 * mapSize];
             // 获取摄像头对象
@@ -106,6 +141,16 @@ namespace Script {
                 // 更新当前角度
                 nowAngle += speed;
             }
+            // 检查是否胜利或失败
+            if (isWin) 
+            {
+                // 胜利
+                Debug.Log("胜利");
+            } else if (isLose) 
+            {
+                // 失败
+                Debug.Log("失败");
+            }
         }
         
         // 以angel为基本角度，修改地图和玩家的角度
@@ -154,6 +199,25 @@ namespace Script {
             playerScript.mapBlocks[index] = mapBlockScript;
             player2Script.mapBlocks[index] = mapBlockScript;
         }
+        
+        // 检查是否胜利(此时玩家1在板块1)
+        public void CheckWin() {
+            // 如果玩家2的板块是2，胜利
+            if (player2Script.mapBlocks[player2Script.position].type == 2) {
+                Win();
+            }
+        }
+        
+        // 胜利
+        public void Win() {
+            isWin = true;
+        }
+        
+        // 失败
+        public void GameOver() {
+            isLose = true;
+        }
+
     }
 
 }

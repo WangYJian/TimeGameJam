@@ -51,10 +51,10 @@ public class CameraView : MonoBehaviour
             // 获取鼠标移动距离
             float x = Input.GetAxis("Mouse X");
             float y = Input.GetAxis("Mouse Y");
-            // 计算旋转角度
-            rotateAngle = x * speed * Time.deltaTime;
+            // 计算旋转角度（使用实际时间）
+            rotateAngle = x * speed * Time.fixedDeltaTime;
             // 计算垂直旋转角度
-            float verticalAngle = y * speed * Time.deltaTime;
+            float verticalAngle = y * speed * Time.fixedDeltaTime;
             // 绕x轴旋转和绕y轴旋转
             transform.RotateAround(target.transform.position, transform.right, -verticalAngle);
             transform.RotateAround(target.transform.position, Vector3.up, rotateAngle);
@@ -79,7 +79,7 @@ public class CameraView : MonoBehaviour
             float nowAngle = Mathf.PI * 2 / mapScript.mapSize * playerScript.position;
             Quaternion rotation = mapRing.GetRotationOnMobiusRing(nowAngle % (Mathf.PI * 2)) * Quaternion.Euler( angle / 2, 0, 0);
             // 如果angle大于360度, 则旋转180度
-            if (nowAngle > 2 * Mathf.PI)
+            if (playerScript.position % mapScript.mapSize > mapScript.mapSize)
             {
                 rotation = rotation * Quaternion.Euler(0, 180, 180);
             }

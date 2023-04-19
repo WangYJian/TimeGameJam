@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5949265739914962779
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5949265739914962777}
+  - component: {fileID: 5949265739914962778}
+  m_Layer: 0
+  m_Name: Map
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5949265739914962777
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5949265739914962779}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 13.680786, y: 5.8313303, z: -8.517123}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &5949265739914962778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5949265739914962779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cadc1c99499464a579220b2fd5c8698a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isWin: 0
+  isLose: 0
+  maxRound: 10
+  nowRound: 0
+  mapSize: 20
+  mapRadius: 4
+  blockPrefab:
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  - {fileID: 8692092421341520732, guid: 01c515e7363f842c695037bbda86fdd0, type: 3}
+  MapBlocks: []
+  delayTime: 1
+  playerPrefab:
+  - {fileID: 1853498840253081709, guid: c45342260ed4b4929abc02638fbfcbb8, type: 3}
+  - {fileID: 1853498840253081709, guid: 7d2e1d4f41cdd49f093f09519de53833, type: 3}
+  players: []
+  playerInitPosition: 0000000014000000
+  playerScript: {fileID: 0}
+  player2Script: {fileID: 0}
+  cameraView: {fileID: 0}
+  nowAngle: 0
+  selectedBlock: -1

@@ -1,0 +1,11 @@
+{
+    "MapSize": 15, 
+    "MapRadius": 4,
+    "PlayerInitPosition": [
+        0,
+        10
+    ],
+    "MapType": [3,6,5,7], 
+    "MaxRound": 10,
+    "DelayTime": 1
+}
