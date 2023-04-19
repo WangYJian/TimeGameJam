@@ -13,9 +13,11 @@ namespace Script {
         public GameObject[] MapBlocks; // 地图的方块信息
         // 地图类型字典
         public Dictionary<int, int> mapType = new Dictionary<int, int>() {
-            {0, 0},
-            {7, 1},
+            {3, 4},
+            {7, 2}
         };
+        // 延迟时间
+        public int delayTime = 1;
         
         public GameObject[] playerPrefab; // 玩家预制体
         public GameObject[] players; // 玩家对象
@@ -89,6 +91,9 @@ namespace Script {
 
             // 初始化地图
             RotateMap(cameraView.angle);
+            
+            // 设置玩家二延迟
+            player2Script.frozenRound = delayTime;
         }
         
         void Update() {
@@ -147,6 +152,7 @@ namespace Script {
             mapBlockScript.index = index;
             mapBlockScript.type = type;
             playerScript.mapBlocks[index] = mapBlockScript;
+            player2Script.mapBlocks[index] = mapBlockScript;
         }
     }
 

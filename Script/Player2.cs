@@ -17,7 +17,7 @@ public class Player2 : MonoBehaviour
     public int maxMoveDistance = 6;
     public int nowPath = 0; // 目前所在的路径
     public Player playerScript; // 玩家1的脚本
-    public int frozenRound = 0; // 延迟回合数
+    public int frozenRound = 1; // 延迟回合数
     public int stopRound = 0; // 停止回合数
 
     // 移动需要的参数
@@ -44,6 +44,7 @@ public class Player2 : MonoBehaviour
         nowPath = 0;
         // 获取玩家1的脚本
         playerScript = mapScript.players[0].GetComponent<Player>();
+
     }
 
     // Update is called once per frame

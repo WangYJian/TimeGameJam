@@ -43,6 +43,11 @@ public class Player : MonoBehaviour
         movePath.Add(position);
         // 获取副玩家脚本
         player2Script = mapScript.players[1].GetComponent<Player2>();
+        // 获取子物体，设置颜色为蓝色
+        foreach (Transform child in transform)
+        {
+            child.GetComponent<Renderer>().material.color = Color.blue;
+        }
     }
 
     // Update is called once per frame
@@ -77,7 +82,7 @@ public class Player : MonoBehaviour
                 nowTime += Time.deltaTime;
                 nowAngle = (nowAngle + (targetAngle - angle) * Time.deltaTime / time) % (Mathf.PI * 4);
                 transform.localPosition = mapRing.GetPositionOnMobiusRing(nowAngle % (Mathf.PI * 2));
-                Quaternion rotation = mapRing.GetRotationOnMobiusRing(nowAngle % (Mathf.PI * 2)) * Quaternion.Euler( cameraView.angle / 2, 0, 0);
+                Quaternion rotation = mapRing.GetRotationOnMobiusRing(nowAngle % (Mathf.PI * 2)) * Quaternion.Euler( mapScript.nowAngle / 2, 0, 0);
                 // 如果angle大于360度, 则旋转180度
                 if (nowAngle > 2 * Mathf.PI)
                 {
@@ -106,6 +111,14 @@ public class Player : MonoBehaviour
                     case 2:
                         // 如果是加事件，将玩家2停止一回合，玩家1移动两个位置
                         AddOrSub(2, true);
+                        break;
+                    case 3:
+                        // 如果是减事件，将玩家2停止一回合，玩家1移动两个位置
+                        AddOrSub(2, false);
+                        break;
+                    case 4:
+                        // 替换事件，将玩家2和玩家1的位置互换
+                        Replace();
                         break;
                 }
 
@@ -165,7 +178,7 @@ public class Player : MonoBehaviour
         else
         {
             // 将玩家2停止1回合
-            player2Script.frozenRound = 1;
+            player2Script.stopRound = 1;
             // 玩家1移动num个位置
             int toPosition = position - num;
             if (toPosition < 0)
@@ -177,6 +190,25 @@ public class Player : MonoBehaviour
         
         // 将当前位置的板块恢复类型
         mapScript.ChangeBlockType(position, 0);
+    }
+    
+    // 替换事件
+    public void Replace()
+    {
+        // 将当前位置的板块恢复类型
+        mapScript.ChangeBlockType(position, 0);
+        // 存储当前玩家1的位置
+        int lastPosition = this.position;
+        // 设定玩家1的位置为玩家2的位置
+        position = player2Script.position;
+        // 添加移动路径
+        movePath.Add(position);
+        movePath.Add(position);
+        // 将玩家2的位置设定为玩家1的位置
+        player2Script.position = lastPosition;
+        player2Script.nowPath += 2;
+        // 将镜头移动到玩家1的位置
+        cameraView.MoveCamera(lastPosition, position);
     }
 
 

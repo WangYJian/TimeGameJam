@@ -11,7 +11,36 @@ public class MapBlock : MonoBehaviour {
 
     // Start is called before the first frame update
     void Start() {
-        
+        // 根据type 设置颜色
+        switch (type) {
+            case 0:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
+                break;
+            case 1:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.gray;
+                break;
+            case 2:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.green;
+                break;
+            case 3:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.blue;
+                break;
+            case 4:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.yellow;
+                break;
+            case 5:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.cyan;
+                break;
+            case 6:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.magenta;
+                break;
+            case 7:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.gray;
+                break;
+            case 8:
+                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.black;
+                break;
+        }
     }
 
     // Update is called once per frame
