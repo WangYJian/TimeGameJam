@@ -42,6 +42,7 @@ namespace Utils {
             Vector3 normal = Vector3.Cross(tangentU, tangentV).normalized;
             return Quaternion.LookRotation(tangentV, normal);
         }
+        
     }
 }
 

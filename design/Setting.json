@@ -3,9 +3,9 @@
     "MapRadius": 4,
     "PlayerInitPosition": [
         0,
-        10
+        15
     ],
-    "MapType": [3,6,5,7], 
+    "MapType": [1,1,2,2,3,3,4,4,5,5,6,6,7,7], 
     "MaxRound": 10,
     "DelayTime": 1
 }

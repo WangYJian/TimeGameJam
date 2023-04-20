@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Script;
@@ -75,16 +76,17 @@ public class CameraView : MonoBehaviour
         // 移动相机直到玩家方向向上
         if (isMoving)
         {
-            // 获取在当前角度下玩家的方向
-            float nowAngle = Mathf.PI * 2 / mapScript.mapSize * playerScript.position;
-            Quaternion rotation = mapRing.GetRotationOnMobiusRing(nowAngle % (Mathf.PI * 2)) * Quaternion.Euler( angle / 2, 0, 0);
-            // 如果angle大于360度, 则旋转180度
-            if (playerScript.position % mapScript.mapSize > mapScript.mapSize)
+            playerScript.transform.localPosition = playerScript.mapBlocks[playerScript.position].transform.localPosition;
+            playerScript.transform.localRotation = playerScript.mapBlocks[playerScript.position].transform.localRotation;
+            // 设置当前Map的旋转角度为当前角度
+            mapScript.nowAngle = angle;
+            // 如果玩家的绝对位置朝上，则停止移动
+            float rotation = playerScript.transform.rotation.eulerAngles.x;
+            if (rotation > 180)
             {
-                rotation = rotation * Quaternion.Euler(0, 180, 180);
+                rotation = Mathf.Abs(rotation - 360);
             }
-            // 如果玩家方向向上，则停止移动
-            if (Mathf.Abs(rotation.eulerAngles.y - 270) < 20)
+            if (Mathf.Abs(rotation) < 20 && Mathf.Abs( playerScript.transform.rotation.eulerAngles.z - 180) >= 10)
             {
                 isMoving = false;
             }

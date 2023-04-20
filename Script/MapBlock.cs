@@ -8,39 +8,23 @@ using Utils;
 public class MapBlock : MonoBehaviour {
     public int index; // 序号
     public int type; // 类型
+    // 颜色数组
+    public Color[] colors = new Color[9] {
+        Color.white,
+        Color.gray,
+        Color.green,
+        Color.blue,
+        Color.yellow,
+        Color.cyan,
+        Color.magenta,
+        Color.gray,
+        Color.black
+    };
 
     // Start is called before the first frame update
     void Start() {
         // 根据type 设置颜色
-        switch (type) {
-            case 0:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
-                break;
-            case 1:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.gray;
-                break;
-            case 2:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.green;
-                break;
-            case 3:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.blue;
-                break;
-            case 4:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.yellow;
-                break;
-            case 5:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.cyan;
-                break;
-            case 6:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.magenta;
-                break;
-            case 7:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.gray;
-                break;
-            case 8:
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.black;
-                break;
-        }
+        transform.GetChild(0).GetComponent<Renderer>().material.color = colors[type];
     }
 
     // Update is called once per frame
@@ -94,8 +78,8 @@ public class MapBlock : MonoBehaviour {
                     mapScript.GameOver();
                 }
             }
-            // 将被选中的方块标记为白色
-            mapScript.MapBlocks[mapScript.selectedBlock].transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
+            // 将被选中的方块标记为类型对应的颜色
+            mapScript.MapBlocks[mapScript.selectedBlock].transform.GetChild(0).GetComponent<Renderer>().material.color = colors[mapScript.MapBlocks[mapScript.selectedBlock].GetComponent<MapBlock>().type];
             // 取消选中
             mapScript.selectedBlock = -1;
         }

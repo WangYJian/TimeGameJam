@@ -42,6 +42,7 @@ namespace Script {
         
         public GameObject[] playerPrefab; // 玩家预制体
         public GameObject[] players; // 玩家对象
+        public GameObject predictPrefab; // 预测预制体
         public int[] playerInitPosition = {0, 20}; // 玩家初始化位置
         // 玩家脚本
         public Player playerScript;
@@ -110,7 +111,7 @@ namespace Script {
                 mapBlockScript2.type = type2;
             }
             
-            players = new GameObject[2];
+            players = new GameObject[3];
             // 初始化玩家1
             players[0] = Instantiate(playerPrefab[0], transform);
             playerScript = players[0].GetComponent<Player>();
@@ -123,6 +124,10 @@ namespace Script {
             players[1].transform.localPosition = MapBlocks[playerInitPosition[1]].transform.localPosition;
             players[1].transform.localRotation = MapBlocks[playerInitPosition[1]].transform.localRotation;
             player2Script.position = playerInitPosition[1];
+            // 初始化预测
+            players[2] = Instantiate(predictPrefab, transform);
+            players[2].transform.localPosition = MapBlocks[playerInitPosition[1]].transform.localPosition;
+            players[2].transform.localRotation = MapBlocks[playerInitPosition[1]].transform.localRotation;
 
             // 初始化地图
             RotateMap(cameraView.angle);

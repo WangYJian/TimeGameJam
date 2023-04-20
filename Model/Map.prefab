@@ -66,6 +66,7 @@ MonoBehaviour:
   - {fileID: 1853498840253081709, guid: c45342260ed4b4929abc02638fbfcbb8, type: 3}
   - {fileID: 1853498840253081709, guid: 7d2e1d4f41cdd49f093f09519de53833, type: 3}
   players: []
+  predictPrefab: {fileID: 5602632251979485116, guid: 04f303b9d638c49a8b2062a49195bd61, type: 3}
   playerInitPosition: 0000000014000000
   playerScript: {fileID: 0}
   player2Script: {fileID: 0}

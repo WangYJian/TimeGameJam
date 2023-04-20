@@ -54,9 +54,29 @@ public class Player2 : MonoBehaviour
         switch (status)
         {
             case 0:
+            {
                 transform.localPosition = mapBlocks[position].transform.localPosition;
                 transform.localRotation = mapBlocks[position].transform.localRotation;
+                // 如果数组不为空
+                if (playerScript.moveDistance.Count != 0)
+                {
+                    // 计算最近距离
+                    int distance1 = playerScript.moveDistance[nowPath];
+                    int position1 = (this.position + distance1) % (2 * mapScript.mapSize);
+                    if (position1 < 0)
+                    {
+                        position1 += 2 * mapScript.mapSize;
+                    }
+                    mapScript.players[2].transform.localPosition = mapBlocks[position1].transform.localPosition;
+                    mapScript.players[2].transform.localRotation = mapBlocks[position1].transform.localRotation;
+                }
+                else
+                {
+                    mapScript.players[2].transform.localPosition = mapBlocks[this.position].transform.localPosition;
+                    mapScript.players[2].transform.localRotation = mapBlocks[this.position].transform.localRotation;
+                }
                 break;
+            }
             case 1:
                 if (flag)
                 {
@@ -95,6 +115,8 @@ public class Player2 : MonoBehaviour
                 {
                     status = 0;
                     flag = true;
+                    // 设置预测点
+                    
                 }
                 break;
         }
@@ -138,5 +160,4 @@ public class Player2 : MonoBehaviour
         // 更新路径
         nowPath++;
     }
-
 }

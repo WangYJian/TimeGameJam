@@ -114,29 +114,7 @@ public class Player : MonoBehaviour
             // 如果在翻转，调用翻转函数
             case 2:
             {
-                // 如果是翻转事件，将玩家1翻转
-                if (flag)
-                {
-                    mapRing = new MobiusRing(mapScript.mapSize, mapScript.mapRadius);
-                    status = 2;
-                    nowTime = 0;
-                    flag = false;
-                }
-                else
-                {
-                    // 原地翻转随事件翻转180度
-                    if (nowTime < time)
-                    {
-                        nowTime += Time.deltaTime;
-                        // x轴相对自身旋转180度
-                        transform.RotateAround(transform.position, transform.right, 180 * Time.deltaTime / time);
-                    }
-                    else
-                    {
-                        status = 0;
-                        flag = true;
-                    }
-                }
+                status = 0;
                 break;
             }
 
@@ -167,7 +145,7 @@ public class Player : MonoBehaviour
         status = 1;
         this.position = position;
         movePath.Add(position);
-        moveDistance.Add(distance);
+        AddDistancePath(distance);
         // 让副玩家移动
         player2Script.Move(time);
     }
@@ -238,6 +216,8 @@ public class Player : MonoBehaviour
         movePath.Add(position);
         status = 2;
         time = 1;
+        // 移动视角
+        cameraView.MoveCamera(lastPosition, position);
     }
     
     // 触发事件
@@ -285,5 +265,11 @@ public class Player : MonoBehaviour
             case 9:
                 break;
         }
+    }
+    
+    // 添加距离路径
+    public void AddDistancePath(int distance)
+    {
+        moveDistance.Add(distance);
     }
 }
