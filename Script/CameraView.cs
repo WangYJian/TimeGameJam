@@ -22,11 +22,10 @@ public class CameraView : MonoBehaviour
     public Map mapScript;
     // 玩家1脚本
     public Player playerScript;
-    public MobiusRing mapRing;
     // 是否在移动
-    public bool isMoving = false;
+    public bool isMoving;
     // 是否向右移动
-    public bool isRight = false;
+    public bool isRight;
 
 
     void Start()
@@ -40,11 +39,45 @@ public class CameraView : MonoBehaviour
         angle = 90;
         // 获取玩家1脚本
         playerScript = mapScript.players[0].GetComponent<Player>();
-        mapRing = new MobiusRing(mapScript.mapSize, mapScript.mapRadius);
     }
 
     // Update is called once per frame
     void Update()
+    {
+        // 鼠标拖动，按动鼠标拖动改变相机角度
+        OnMouseDrag();
+        // 移动相机直到玩家方向向上
+        MoveCameraToPlayer();
+    }
+    
+    // 移动相机, 参数为当前位置和目标位置
+    public void MoveCamera(int nowPosition, int targetPosition)
+    {
+        // 计算移动方向
+        int direction = targetPosition - nowPosition;
+        // 计算最近的移动方向
+        if (direction > mapScript.mapSize)
+        {
+            direction = direction - mapScript.mapSize;
+        }
+        else if (direction < -mapScript.mapSize)
+        {
+            direction = direction + mapScript.mapSize;
+        }
+        // 如果移动方向大于0，则向右移动
+        if (direction > 0)
+        {
+            isRight = true;
+        }
+        else
+        {
+            isRight = false;
+        }
+        isMoving = true;
+    }
+    
+    // 处理鼠标拖动镜头
+    private void OnMouseDrag()
     {
         // 鼠标拖动，按动鼠标拖动改变相机角度
         if (Input.GetMouseButton(0))
@@ -73,11 +106,17 @@ public class CameraView : MonoBehaviour
         }
         // 设置相机位置
         transform.position = target.transform.position - transform.forward * distance;
-        // 移动相机直到玩家方向向上
+    }
+    
+    // 移动相机到玩家位置
+    private void MoveCameraToPlayer()
+    {
         if (isMoving)
         {
-            playerScript.transform.localPosition = playerScript.mapBlocks[playerScript.position].transform.localPosition;
-            playerScript.transform.localRotation = playerScript.mapBlocks[playerScript.position].transform.localRotation;
+            playerScript.transform.localPosition =
+                playerScript.mapBlocks[playerScript.position].transform.localPosition;
+            playerScript.transform.localRotation =
+                playerScript.mapBlocks[playerScript.position].transform.localRotation;
             // 设置当前Map的旋转角度为当前角度
             mapScript.nowAngle = angle;
             // 如果玩家的绝对位置朝上，则停止移动
@@ -86,7 +125,8 @@ public class CameraView : MonoBehaviour
             {
                 rotation = Mathf.Abs(rotation - 360);
             }
-            if (Mathf.Abs(rotation) < 20 && Mathf.Abs( playerScript.transform.rotation.eulerAngles.z - 180) >= 10)
+
+            if (Mathf.Abs(rotation) < 20 && Mathf.Abs(playerScript.transform.rotation.eulerAngles.z - 180) >= 10)
             {
                 isMoving = false;
             }
@@ -110,31 +150,5 @@ public class CameraView : MonoBehaviour
                 }
             }
         }
-    }
-    
-    // 移动相机, 参数为当前位置和目标位置
-    public void MoveCamera(int nowPosition, int targetPosition)
-    {
-        // 计算移动方向
-        int direction = targetPosition - nowPosition;
-        // 计算最近的移动方向
-        if (direction > mapScript.mapSize)
-        {
-            direction = direction - mapScript.mapSize;
-        }
-        else if (direction < -mapScript.mapSize)
-        {
-            direction = direction + mapScript.mapSize;
-        }
-        // 如果移动方向大于0，则向右移动
-        if (direction > 0)
-        {
-            isRight = true;
-        }
-        else
-        {
-            isRight = false;
-        }
-        isMoving = true;
     }
 }
