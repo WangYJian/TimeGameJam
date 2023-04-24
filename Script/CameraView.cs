@@ -36,9 +36,9 @@ public class CameraView : MonoBehaviour
         transform.LookAt(target.transform);
         // 获取Map脚本
         mapScript = GameObject.Find("Map").GetComponent<Map>();
+        playerScript = mapScript.GetPlayer1Script();
         angle = 90;
-        // 获取玩家1脚本
-        playerScript = mapScript.players[0].GetComponent<Player>();
+       
     }
 
     // Update is called once per frame
@@ -55,24 +55,9 @@ public class CameraView : MonoBehaviour
     {
         // 计算移动方向
         int direction = targetPosition - nowPosition;
-        // 计算最近的移动方向
-        if (direction > mapScript.mapSize)
-        {
-            direction = direction - mapScript.mapSize;
-        }
-        else if (direction < -mapScript.mapSize)
-        {
-            direction = direction + mapScript.mapSize;
-        }
+        direction = mapScript.GetComplement(direction);
         // 如果移动方向大于0，则向右移动
-        if (direction > 0)
-        {
-            isRight = true;
-        }
-        else
-        {
-            isRight = false;
-        }
+        isRight = direction > 0;
         isMoving = true;
     }
     
@@ -113,12 +98,9 @@ public class CameraView : MonoBehaviour
     {
         if (isMoving)
         {
-            playerScript.transform.localPosition =
-                playerScript.mapBlocks[playerScript.position].transform.localPosition;
-            playerScript.transform.localRotation =
-                playerScript.mapBlocks[playerScript.position].transform.localRotation;
+            playerScript.UpdatePosition();
             // 设置当前Map的旋转角度为当前角度
-            mapScript.nowAngle = angle;
+            mapScript.SetAngle(angle);
             // 如果玩家的绝对位置朝上，则停止移动
             float rotation = playerScript.transform.rotation.eulerAngles.x;
             if (rotation > 180)

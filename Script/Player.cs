@@ -9,46 +9,41 @@ using Utils;
 
 public class Player : MonoBehaviour
 {
-    public int position = 0;     // 当前位置
-    public int status = 0; // 玩家状态，0为正常，1为移动, 2为翻转
-    public Map mapScript; // Map脚本
-    public List<MapBlock> mapBlocks = new List<MapBlock>(); // 所有位置的脚本
-    public CameraView cameraView; // 摄像机视角
-    public int maxMoveDistance = 6;
-    public List<int> movePath = new List<int>();
-    public List<int> moveDistance = new List<int>();
+    private int position = 0;     // 当前位置
+    private int status = 0; // 玩家状态，0为正常，1为移动, 2为翻转
+    private Map mapScript; // Map脚本
+    private List<MapBlock> mapBlocks = new List<MapBlock>(); // 所有位置的脚本
+    private CameraView cameraView; // 摄像机视角
+    private int maxMoveDistance = 6;
+    private List<int> movePath = new List<int>();
+    private List<int> moveDistance = new List<int>();
 
     // 移动需要的参数
-    public float angle;
-    public float targetAngle;
-    public float time;
-    public float nowAngle;
-    public bool flag = true;
-    public float nowTime;
-    public MobiusRing mapRing;
+    private float angle;
+    private float targetAngle;
+    private float time;
+    private float nowAngle;
+    private bool flag = true;
+    private float nowTime;
+    private MobiusRing mapRing;
     
     // 副玩家脚本
-    public Player2 player2Script;
+    private Player2 player2Script;
 
     void Start()
     {
         // 获取Map脚本
         mapScript = transform.parent.GetComponent<Map>();
         // 获取所有位置的脚本
-        foreach (var mapBlock in mapScript.MapBlocks)
-        {
-            mapBlocks.Add(mapBlock.GetComponent<MapBlock>());
-        }
+        mapBlocks = mapScript.GetAllMapBlockScript();
         // 获取摄像机视角
         cameraView = Camera.main.GetComponent<CameraView>();
         movePath.Add(position);
         // 获取副玩家脚本
-        player2Script = mapScript.players[1].GetComponent<Player2>();
+        player2Script = mapScript.GetPlayer2Script();
+        mapRing = mapScript.GetMapRing();
         // 获取子物体，设置颜色为蓝色
-        foreach (Transform child in transform)
-        {
-            child.GetComponent<Renderer>().material.color = Color.blue;
-        }
+        SetColor(Color.blue);
     }
 
     // Update is called once per frame
@@ -59,8 +54,7 @@ public class Player : MonoBehaviour
             // 如果没有在移动，将位置赋值为当前位置板块的角度
             case 0:
             {
-                transform.localPosition = mapBlocks[position].transform.localPosition;
-                transform.localRotation = mapBlocks[position].transform.localRotation;
+                UpdatePosition();
                 break;
             }
             // 如果在移动，调用移动函数
@@ -68,7 +62,6 @@ public class Player : MonoBehaviour
             {
                 if (flag)
                 {
-                    mapRing = new MobiusRing(mapScript.mapSize, mapScript.mapRadius);
                     status = 1;
                     nowTime = 0;
                     if (targetAngle - angle > 2 * Mathf.PI)
@@ -83,24 +76,13 @@ public class Player : MonoBehaviour
                     flag = false;
                     nowAngle = angle;
                 }
-
                 if (nowTime < time)
                 {
                     // 获取开始和结束的旋转
                     nowTime += Time.deltaTime;
                     nowAngle = (nowAngle + (targetAngle - angle) * Time.deltaTime / time) % (Mathf.PI * 4);
                     transform.localPosition = mapRing.GetPositionOnMobiusRing(nowAngle % (Mathf.PI * 2));
-                    Quaternion rotation = mapRing.GetRotationOnMobiusRing(nowAngle % (Mathf.PI * 2)) *
-                                          Quaternion.Euler(mapScript.nowAngle / 2, 0, 0);
-                    // 如果angle大于360度, 则旋转180度
-                    if (nowAngle > 2 * Mathf.PI)
-                    {
-                        transform.localRotation = rotation * Quaternion.Euler(0, 180, 180);
-                    }
-                    else
-                    {
-                        transform.localRotation = rotation;
-                    }
+                    transform.localRotation = mapScript.GetRotationByAngle(nowAngle);
                 }
                 else
                 {
@@ -125,12 +107,7 @@ public class Player : MonoBehaviour
     public void MoveTo(int position)
     {
         // 计算最近距离
-        int distance = position - this.position;
-        // 如果距离大于一半
-        if (Mathf.Abs(distance) > mapScript.mapSize)
-        {
-            distance = distance > 0 ? distance - 2 * mapScript.mapSize : distance + 2 * mapScript.mapSize;
-        }
+        int distance = mapScript.GetComplement(position - this.position);
         //计算移动时间
         time = Mathf.Abs(distance) * 0.5f;
         if (time == 0)
@@ -138,9 +115,9 @@ public class Player : MonoBehaviour
             time = 0.5f;
         }
         // 目前位置对应的角度
-        angle = Mathf.PI * 2 / mapScript.mapSize * this.position;
+        angle = mapScript.GetAngleByPosition(this.position);
         // 目标位置对应的角度
-        targetAngle = Mathf.PI * 2 / mapScript.mapSize * position;
+        targetAngle = mapScript.GetAngleByPosition(position); 
         // 旋转
         status = 1;
         this.position = position;
@@ -168,19 +145,14 @@ public class Player : MonoBehaviour
             // 将玩家2停止1回合
             player2Script.frozenRound = 1;
             // 玩家1移动num个位置
-            MoveTo((position + num) % (2 * mapScript.mapSize));
+            MoveTo( mapScript.GetMod((position + num)));
         }
         else
         {
             // 将玩家2停止1回合
             player2Script.stopRound = 1;
             // 玩家1移动num个位置
-            int toPosition = position - num;
-            if (toPosition < 0)
-            {
-                toPosition += 2 * mapScript.mapSize;
-            }
-            MoveTo(toPosition);
+            MoveTo(mapScript.GetMod(position - num));
         }
         
         // 将当前位置的板块恢复类型
@@ -209,9 +181,9 @@ public class Player : MonoBehaviour
     {
         // 将当前位置的板块恢复类型
         mapScript.ChangeBlockType(position, 0);
-        // 将玩家1位置加上地图大小
         int lastPosition = position;
-        position = (position + mapScript.mapSize) % (2 * mapScript.mapSize);
+        // 获取对面位置
+        position = mapScript.GetOppositePosition(position);
         // 添加移动路径
         movePath.Add(position);
         status = 2;
@@ -230,7 +202,7 @@ public class Player : MonoBehaviour
             return;
         }
         // 通过当前位置的板块类型判断触发事件
-        switch (mapBlocks[position].type)
+        switch (mapBlocks[position].GetBlockType())
         {
             case 0:
                 break;
@@ -272,4 +244,66 @@ public class Player : MonoBehaviour
     {
         moveDistance.Add(distance);
     }
+    
+    // 设置子物体颜色
+    public void SetColor(Color color)
+    {
+        foreach (Transform child in transform)
+        {
+            child.GetComponent<Renderer>().material.color = color;
+        }
+    }
+    
+    // 改变位置坐标为当前位置
+    public void UpdatePosition()
+    {
+        transform.localPosition = mapBlocks[position].transform.localPosition;
+        transform.localRotation = mapBlocks[position].transform.localRotation;
+    }
+    
+    // 设定当前位置
+    public void SetPosition(int position)
+    {
+        this.position = position;
+    }
+    
+    // 设定方块脚本
+    public void SetMapBlockScript(MapBlock mapBlockScript, int index)
+    {
+        mapBlocks[index] = mapBlockScript;
+    }
+    
+    // 获取当前玩家状态
+    public int GetStatus()
+    {
+        return status;
+    }
+    
+    // 获取玩家的位置
+    public int GetPosition()
+    {
+        return position;
+    }
+    
+    // 判断距离是否大于最大距离
+    public bool IsDistanceBiggerThanMaxDistance(int distance)
+    {
+        return Mathf.Abs(distance) > maxMoveDistance;
+    }
+    
+    // 获取当前移动路径距离
+    public int GetMoveDistance(int nowPath)
+    {
+        // 如果当前路径大于移动路径长度，返回0
+        if (nowPath >= moveDistance.Count)
+        {
+            return 0;
+        }
+        else
+        {
+            return moveDistance[nowPath];
+        }
+    }
+
+
 }

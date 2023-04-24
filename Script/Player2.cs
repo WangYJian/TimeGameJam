@@ -13,12 +13,11 @@ public class Player2 : MonoBehaviour
     public int status = 0; // 玩家状态，0为正常，1为移动, 2为翻转
     public Map mapScript; // Map脚本
     public List<MapBlock> mapBlocks = new List<MapBlock>(); // 所有位置的脚本
-    public CameraView cameraView; // 摄像机视角
-    public int maxMoveDistance = 6;
     public int nowPath = 0; // 目前所在的路径
     public Player playerScript; // 玩家1的脚本
     public int frozenRound = 1; // 延迟回合数
     public int stopRound = 0; // 停止回合数
+    public GameObject predictObject; // 预测对象
 
     // 移动需要的参数
     public float angle;
@@ -35,15 +34,13 @@ public class Player2 : MonoBehaviour
         // 获取Map脚本
         mapScript = transform.parent.GetComponent<Map>();
         // 获取所有位置的脚本
-        foreach (var mapBlock in mapScript.MapBlocks)
-        {
-            mapBlocks.Add(mapBlock.GetComponent<MapBlock>());
-        }
-        // 获取摄像机视角
-        cameraView = Camera.main.GetComponent<CameraView>();
+        mapBlocks = mapScript.GetAllMapBlockScript();
         nowPath = 0;
         // 获取玩家1的脚本
-        playerScript = mapScript.players[0].GetComponent<Player>();
+        playerScript = mapScript.GetPlayer1Script();
+        mapRing = mapScript.GetMapRing();
+        // 获取预测对象
+        predictObject = mapScript.GetPrediction();
 
     }
 
@@ -58,29 +55,16 @@ public class Player2 : MonoBehaviour
                 transform.localPosition = mapBlocks[position].transform.localPosition;
                 transform.localRotation = mapBlocks[position].transform.localRotation;
                 // 如果数组不为空
-                if (playerScript.moveDistance.Count != 0)
-                {
-                    // 计算最近距离
-                    int distance1 = playerScript.moveDistance[nowPath];
-                    int position1 = (this.position + distance1) % (2 * mapScript.mapSize);
-                    if (position1 < 0)
-                    {
-                        position1 += 2 * mapScript.mapSize;
-                    }
-                    mapScript.players[2].transform.localPosition = mapBlocks[position1].transform.localPosition;
-                    mapScript.players[2].transform.localRotation = mapBlocks[position1].transform.localRotation;
-                }
-                else
-                {
-                    mapScript.players[2].transform.localPosition = mapBlocks[this.position].transform.localPosition;
-                    mapScript.players[2].transform.localRotation = mapBlocks[this.position].transform.localRotation;
-                }
+                // 计算最近距离
+                int distance1 = playerScript.GetMoveDistance(nowPath);
+                int position1 = mapScript.GetMod(position + distance1);
+                predictObject.transform.localPosition = mapBlocks[position1].transform.localPosition;
+                predictObject.transform.localRotation = mapBlocks[position1].transform.localRotation;
                 break;
             }
             case 1:
                 if (flag)
                 {
-                    mapRing = new MobiusRing(mapScript.mapSize, mapScript.mapRadius);
                     status = 1;
                     nowTime = 0;
                     if (targetAngle - angle > 2 * Mathf.PI)
@@ -99,24 +83,13 @@ public class Player2 : MonoBehaviour
                     nowTime += Time.deltaTime;
                     nowAngle = (nowAngle + (targetAngle - angle) * Time.deltaTime / time) % (Mathf.PI * 4);
                     transform.localPosition = mapRing.GetPositionOnMobiusRing(nowAngle % (Mathf.PI * 2));
-                    Quaternion rotation = mapRing.GetRotationOnMobiusRing(nowAngle % (Mathf.PI * 2)) *
-                                          Quaternion.Euler(mapScript.nowAngle / 2, 0, 0);
-                    // 如果angle大于360度, 则旋转180度
-                    if (nowAngle > 2 * Mathf.PI)
-                    {
-                        transform.localRotation = rotation * Quaternion.Euler(0, 180, 180);
-                    }
-                    else
-                    {
-                        transform.localRotation = rotation;
-                    }
+                    transform.localRotation = mapScript.GetRotationByAngle(nowAngle);
                 }
                 else
                 {
                     status = 0;
                     flag = true;
                     // 设置预测点
-                    
                 }
                 break;
         }
@@ -140,19 +113,15 @@ public class Player2 : MonoBehaviour
         }
         
         // 计算最近距离
-        int distance = playerScript.moveDistance[nowPath];
-        int position = (this.position + distance) % (2 * mapScript.mapSize);
-        if (position < 0)
-        {
-            position += 2 * mapScript.mapSize;
-        }
+        int distance = playerScript.GetMoveDistance(nowPath);
+        int position = mapScript.GetMod(this.position + distance);
 
         //计算移动时间
         this.time = time;
         // 目前位置对应的角度
-        angle = Mathf.PI * 2 / mapScript.mapSize * this.position;
+        angle = mapScript.GetAngleByPosition(this.position);
         // 目标位置对应的角度
-        targetAngle = Mathf.PI * 2 / mapScript.mapSize * position;
+        targetAngle = mapScript.GetAngleByPosition(position);
         // 旋转
         status = 1;
         // 更新位置

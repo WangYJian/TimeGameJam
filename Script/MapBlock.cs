@@ -2,14 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Script;
+using Unity.VisualScripting;
 using UnityEngine;
 using Utils;
 
 public class MapBlock : MonoBehaviour {
-    public int index; // 序号
-    public int type; // 类型
+    private int index; // 序号
+    private int type; // 类型
+    private Map mapScript; // Map脚本
+    private Player playerScript; // 玩家脚本
+    private Player2 player1Script; // 玩家1脚本
     // 颜色数组
-    public Color[] colors = new Color[9] {
+    private Color[] colors = new Color[9] {
         Color.white,
         Color.gray,
         Color.green,
@@ -25,6 +29,11 @@ public class MapBlock : MonoBehaviour {
     void Start() {
         // 根据type 设置颜色
         transform.GetChild(0).GetComponent<Renderer>().material.color = colors[type];
+        // 获取Map脚本(父脚本)
+        mapScript = transform.parent.GetComponent<Map>();
+        playerScript = mapScript.GetPlayer1Script();
+        player1Script = mapScript.GetPlayer2Script();
+
     }
 
     // Update is called once per frame
@@ -35,25 +44,21 @@ public class MapBlock : MonoBehaviour {
     // 鼠标点击事件
     private void OnMouseDown()
     {
+        // 获取玩家状态
         
-        // 获取父物体的脚本
-        Map mapScript = transform.parent.GetComponent<Map>();
-        // 获取玩家脚本
-        Player playerScript = mapScript.players[0].GetComponent<Player>();
-        Player2 player2Script = mapScript.players[1].GetComponent<Player2>();
         // 如果玩家正在移动，不执行
-        if (playerScript.status != 0 || player2Script.status != 0)
+        if (mapScript.IsPlayerMoving())
         {
             return;
         }
         // 查看是否有方块被选中
-        if (mapScript.selectedBlock == -1)
+        if (mapScript.GetSelectedBlock() == -1)
         {
             // 如果没有被选中，同时玩家在当前方块上，则将当前方块选中
-            if (playerScript.position  == index)
+            if (mapScript.GetPlayerPosition(0)  == index)
             {
                 // 将当前方块的序号存储到被选中的方块中
-                mapScript.selectedBlock = index;
+                mapScript.SetSelectedBlock(index);
                 // 获取子物体, 渲染成红色
                 transform.GetChild(0).GetComponent<Renderer>().material.color = Color.red;
             }
@@ -61,27 +66,42 @@ public class MapBlock : MonoBehaviour {
         else
         {
             // 如果被选中的方块不是当前方块，先判断距离是否小于最大距离，如果是则移动
-            int distance = Math.Abs(mapScript.selectedBlock - index);
-            if (distance > mapScript.mapSize)
-            {
-                distance = 2 * mapScript.mapSize - distance;
-            }
-            if (distance <= playerScript.maxMoveDistance)
+            int distance = Mathf.Abs(mapScript.GetComplement(mapScript.GetSelectedBlock() - index));
+            
+            if (!playerScript.IsDistanceBiggerThanMaxDistance(distance))
             {
                 // 移动
                playerScript.MoveTo(index);
                 // 减少回合数
-                mapScript.nowRound--;
-                // 如果回合数为0，失败
-                if (mapScript.nowRound == 0)
-                {
-                    mapScript.GameOver();
-                }
+                mapScript.ReduceRound();
             }
-            // 将被选中的方块标记为类型对应的颜色
-            mapScript.MapBlocks[mapScript.selectedBlock].transform.GetChild(0).GetComponent<Renderer>().material.color = colors[mapScript.MapBlocks[mapScript.selectedBlock].GetComponent<MapBlock>().type];
-            // 取消选中
-            mapScript.selectedBlock = -1;
+            // 将被选中的方块恢复颜色
+            mapScript.RecoverSelectedBlockColor();
         }
+    }
+    
+    // 恢复颜色
+    public void RecoverColor()
+    {
+        transform.GetChild(0).GetComponent<Renderer>().material.color = colors[type];
+    }
+    
+    // 设置基础信息
+    public void SetBaseInfo(int index, int type)
+    {
+        this.index = index;
+        this.type = type;
+    }
+    
+    // 获取序号
+    public int GetBlockIndex()
+    {
+        return index;
+    }
+    
+    // 获取类型
+    public int GetBlockType()
+    {
+        return type;
     }
 }
