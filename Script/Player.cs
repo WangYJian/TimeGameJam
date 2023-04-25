@@ -1,10 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using Script;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UIElements;
 using Utils;
 
 public class Player : MonoBehaviour
@@ -21,11 +17,11 @@ public class Player : MonoBehaviour
     // 移动需要的参数
     private float angle;
     private float targetAngle;
-    private float time;
     private float nowAngle;
     private bool flag = true;
-    private float nowTime;
     private MobiusRing mapRing;
+    private float acceleration = 2f; // 加速度
+    private float speed = 0; // 速度
     
     // 副玩家脚本
     private Player2 player2Script;
@@ -60,37 +56,7 @@ public class Player : MonoBehaviour
             // 如果在移动，调用移动函数
             case 1:
             {
-                if (flag)
-                {
-                    status = 1;
-                    nowTime = 0;
-                    if (targetAngle - angle > 2 * Mathf.PI)
-                    {
-                        angle += 4 * Mathf.PI;
-                    }
-                    else if (angle - targetAngle > 2 * Mathf.PI)
-                    {
-                        targetAngle += 4 * Mathf.PI;
-                    }
-
-                    flag = false;
-                    nowAngle = angle;
-                }
-                if (nowTime < time)
-                {
-                    // 获取开始和结束的旋转
-                    nowTime += Time.deltaTime;
-                    nowAngle = (nowAngle + (targetAngle - angle) * Time.deltaTime / time) % (Mathf.PI * 4);
-                    transform.localPosition = mapRing.GetPositionOnMobiusRing(nowAngle % (Mathf.PI * 2));
-                    transform.localRotation = mapScript.GetRotationByAngle(nowAngle);
-                }
-                else
-                {
-                    status = 0;
-                    flag = true;
-                    // 触发事件
-                    TriggerEvent();
-                }
+                Move();
                 break;
             }
             // 如果在翻转，调用翻转函数
@@ -108,12 +74,6 @@ public class Player : MonoBehaviour
     {
         // 计算最近距离
         int distance = mapScript.GetComplement(position - this.position);
-        //计算移动时间
-        time = Mathf.Abs(distance) * 0.5f;
-        if (time == 0)
-        {
-            time = 0.5f;
-        }
         // 目前位置对应的角度
         angle = mapScript.GetAngleByPosition(this.position);
         // 目标位置对应的角度
@@ -124,14 +84,14 @@ public class Player : MonoBehaviour
         movePath.Add(position);
         AddDistancePath(distance);
         // 让副玩家移动
-        player2Script.Move(time);
+        player2Script.Move();
     }
     
     // 延迟事件
     public void Freeze(int num)
     {
         // 将玩家2冻结
-        player2Script.frozenRound = num;
+        player2Script.SetFrozenRound(num);
         // 将当前位置的板块恢复类型
         mapScript.ChangeBlockType(position, 0);
     }
@@ -143,14 +103,14 @@ public class Player : MonoBehaviour
         if (isAdd)
         {
             // 将玩家2停止1回合
-            player2Script.frozenRound = 1;
+            player2Script.SetFrozenRound(1);
             // 玩家1移动num个位置
             MoveTo( mapScript.GetMod((position + num)));
         }
         else
         {
             // 将玩家2停止1回合
-            player2Script.stopRound = 1;
+            player2Script.SetStopRound(1);
             // 玩家1移动num个位置
             MoveTo(mapScript.GetMod(position - num));
         }
@@ -167,11 +127,11 @@ public class Player : MonoBehaviour
         // 存储当前玩家1的位置
         int lastPosition = this.position;
         // 设定玩家1的位置为玩家2的位置
-        position = player2Script.position;
+        position = player2Script.GetPosition();
         // 添加移动路径
         movePath.Add(position);
         // 将玩家2的位置设定为玩家1的位置
-        player2Script.position = lastPosition;
+        player2Script.SetPosition(lastPosition);
         // 将镜头移动到玩家1的位置
         cameraView.MoveCamera(lastPosition, position);
     }
@@ -187,7 +147,6 @@ public class Player : MonoBehaviour
         // 添加移动路径
         movePath.Add(position);
         status = 2;
-        time = 1;
         // 移动视角
         cameraView.MoveCamera(lastPosition, position);
     }
@@ -196,7 +155,7 @@ public class Player : MonoBehaviour
     public void TriggerEvent()
     {
         // 如果玩家2在当前位置，触发翻转
-        if (player2Script.position == position)
+        if (player2Script.GetPosition() == position)
         {
             Reverse();
             return;
@@ -304,6 +263,65 @@ public class Player : MonoBehaviour
             return moveDistance[nowPath];
         }
     }
+    
+    // 移动过程
+    public void Move()
+    {
+        // 初始化
+        if (flag)
+        {
+            status = 1;
+            if (targetAngle - angle > 2 * Mathf.PI)
+            {
+                angle += 4 * Mathf.PI;
+            }
+            else if (angle - targetAngle > 2 * Mathf.PI)
+            {
+                targetAngle += 4 * Mathf.PI;
+            }
+            flag = false;
+            nowAngle = angle;
+        }
+        if (Mathf.Abs(targetAngle - nowAngle) > 0.01)
+        {
+            // 计算当前角度
+            if (targetAngle > nowAngle)
+            {
+                nowAngle += speed * Time.deltaTime;
+                if (nowAngle > (angle + targetAngle) / 2)
+                {
+                    speed -= acceleration * Time.deltaTime;
+                }
+                else
+                {
+                    speed += acceleration * Time.deltaTime;
+                }
+            }
+            else
+            {
+                nowAngle -= speed * Time.deltaTime;
+                if (nowAngle < (angle + targetAngle) / 2)
+                {
+                    speed -= acceleration * Time.deltaTime;
+                }
+                else
+                {
+                    speed += acceleration * Time.deltaTime;
+                }
+            }
+
+            transform.localPosition = mapRing.GetPositionOnMobiusRing(nowAngle % (Mathf.PI * 2));
+            transform.localRotation = mapScript.GetRotationByAngle(nowAngle % (Mathf.PI * 4));
+        }
+        else
+        {
+            status = 0;
+            flag = true;
+            // 触发事件
+            TriggerEvent();
+        }
+    }
+
 
 
 }

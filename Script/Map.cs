@@ -134,7 +134,7 @@ namespace Script {
             player2Script = players[1].GetComponent<Player2>();
             players[1].transform.localPosition = MapBlocks[playerInitPosition[1]].transform.localPosition;
             players[1].transform.localRotation = MapBlocks[playerInitPosition[1]].transform.localRotation;
-            player2Script.position = playerInitPosition[1];
+            player2Script.SetPosition(playerInitPosition[1]);
             // 初始化预测
             players[2] = Instantiate(predictPrefab, transform);
             players[2].transform.localPosition = MapBlocks[playerInitPosition[1]].transform.localPosition;
@@ -144,7 +144,7 @@ namespace Script {
             RotateMap(cameraView.angle);
 
             // 设置玩家二延迟
-            player2Script.frozenRound = delayTime;
+            player2Script.SetFrozenRound(delayTime);
 
             nowRound = maxRound;
         }
@@ -225,14 +225,14 @@ namespace Script {
             // 设置方块信息
             mapBlockScript.SetBaseInfo(index, type);
             playerScript.SetMapBlockScript(mapBlockScript, index);
-            player2Script.mapBlocks[index] = mapBlockScript;
+            player2Script.SetMapBlockScript(mapBlockScript, index);
         }
 
         // 检查是否胜利(此时玩家1在板块1)
         public void CheckWin()
         {
             // 如果玩家2的板块是2，胜利
-            if (player2Script.mapBlocks[player2Script.position].GetBlockIndex() == 2)
+            if (player2Script.GetBlockType() == 2)
             {
                 Win();
             }
@@ -289,7 +289,7 @@ namespace Script {
         // 查看玩家是否正在移动
         public bool IsPlayerMoving()
         {
-            return playerScript.GetStatus() != 0 || player2Script.status != 0;
+            return playerScript.GetStatus() != 0 || player2Script.GetStatus() != 0;
         }
         
         // 查看目前哪个方块被选中
@@ -312,7 +312,7 @@ namespace Script {
                 case 0:
                     return playerScript.GetPosition();
                 case 1:
-                    return player2Script.position;
+                    return player2Script.GetPosition();
                 default:
                     return -1;
             }
