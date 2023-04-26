@@ -57,10 +57,11 @@ namespace Script {
             string json = File.ReadAllText("Assets/design/Setting.json");
             // 将json文件转换为Map结构体
             mapSettings = JsonConvert.DeserializeObject<MapSettings>(json);
-            level = 6;
+            level = 0;
             // 获取摄像头对象
             cameraView = GameObject.Find("Main Camera").GetComponent<CameraView>();
             ChangeMapInfo(level);
+            ShowUI(-1);
         }
         
         // 更改地图关卡

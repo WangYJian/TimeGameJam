@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
 
 public class PanleSetting : MonoBehaviour
@@ -25,6 +21,10 @@ public class PanleSetting : MonoBehaviour
         // 设置两个物体的alpha值为0
         childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, 0);
         selfImage.color = new Color(selfImage.color.r, selfImage.color.g, selfImage.color.b, 0);
+        // 获取canvas组件
+        Canvas canvas = GetComponentInParent<Canvas>();
+        // 绑定相机
+        canvas.worldCamera = Camera.main;
         isShow = false;
     }
 
@@ -43,6 +43,7 @@ public class PanleSetting : MonoBehaviour
                     {
                         childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, 1);
                         selfImage.color = new Color(selfImage.color.r, selfImage.color.g, selfImage.color.b, 1);
+                        Debug.Log(1);
                         isLighting = false;
                     }
                 }

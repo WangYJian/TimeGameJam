@@ -19,6 +19,7 @@ public class Player2 : MonoBehaviour
     private int frozenRound = 1; // 延迟回合数
     private int stopRound = 0; // 停止回合数
     private GameObject predictObject; // 预测对象
+    private Player player1Script; // 获取玩家1的脚本
 
     // 移动需要的参数
     private float angle;
@@ -43,6 +44,7 @@ public class Player2 : MonoBehaviour
         mapRing = mapScript.GetMapRing();
         // 获取预测对象
         predictObject = mapScript.GetPrediction();
+        player1Script = mapScript.GetPlayer1Script();
 
     }
 
@@ -270,6 +272,12 @@ public class Player2 : MonoBehaviour
     // 触发事件
     public void TriggerEvent()
     {
+        // 如果玩家1在当前位置，触发翻转
+        if (player1Script.GetPosition() == position)
+        {
+            player1Script.Reverse();
+            return;
+        }
         // 通过当前位置的板块类型判断触发事件
         switch (mapBlocks[position].GetBlockType())
         {
