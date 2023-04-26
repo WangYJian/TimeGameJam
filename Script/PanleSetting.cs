@@ -22,7 +22,10 @@ public class PanleSetting : MonoBehaviour
         childImage = transform.GetChild(0).GetComponent<UnityEngine.UI.Image>();
         // 获取自己的Image组件
         selfImage = GetComponent<UnityEngine.UI.Image>();
-        isShow = true;
+        // 设置两个物体的alpha值为0
+        childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, 0);
+        selfImage.color = new Color(selfImage.color.r, selfImage.color.g, selfImage.color.b, 0);
+        isShow = false;
     }
 
     void Update()
@@ -78,6 +81,7 @@ public class PanleSetting : MonoBehaviour
                     {
                         childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, 0);
                         isChanging = false;
+                        isShow = true;
                     }
                 }
             }
@@ -93,5 +97,13 @@ public class PanleSetting : MonoBehaviour
             isShow = false;
             isLighting = true;
         }
+    }
+    
+    // 显示面板
+    public void Show()
+    {
+        isChanging = true;
+        isShow = true;
+        isLighting = true;
     }
 }

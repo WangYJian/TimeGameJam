@@ -296,7 +296,6 @@ public class Player2 : MonoBehaviour
             case 7:
                 // 翻转事件，将玩家1翻转
                 Reverse();
-                TriggerEvent();
                 break;
             case 8:
                 break;

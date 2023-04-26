@@ -158,7 +158,7 @@ public class Player : MonoBehaviour
         if (player2Script.GetPosition() == position)
         {
             Reverse(false);
-            TriggerEvent();
+            return;
         }
         // 通过当前位置的板块类型判断触发事件
         switch (mapBlocks[position].GetBlockType())
@@ -191,7 +191,6 @@ public class Player : MonoBehaviour
             case 7:
                 // 翻转事件，将玩家1翻转
                 Reverse(true);
-                TriggerEvent();
                 break;
             case 8:
                 break;
@@ -377,6 +376,7 @@ public class Player : MonoBehaviour
     //获取玩家当前位置的块的脚本
     public MapBlock GetMapBlock()
     {
+        Debug.Log(position);
         return mapBlocks[position];
     }
     

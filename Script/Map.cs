@@ -47,7 +47,7 @@ namespace Script {
         private MapSettings mapSettings; // 地图设置
         private int level = 0; // 关卡
         // UI预制体
-        public GameObject[] UIPrefab;
+        public GameObject[] uiPrefab;
 
 
         void Start()
@@ -57,7 +57,7 @@ namespace Script {
             string json = File.ReadAllText("Assets/design/Setting.json");
             // 将json文件转换为Map结构体
             mapSettings = JsonConvert.DeserializeObject<MapSettings>(json);
-            level = 0;
+            level = 6;
             // 获取摄像头对象
             cameraView = GameObject.Find("Main Camera").GetComponent<CameraView>();
             ChangeMapInfo(level);
@@ -428,7 +428,12 @@ namespace Script {
         // 显示界面
         public void ShowUI(int level)
         {
-            //
+            // 创建UI
+            GameObject ui = Instantiate(uiPrefab[level + 1], transform);
+            // 获取UI脚本
+            PanleSetting uiScript = ui.GetComponent<PanleSetting>();
+            // 显示
+            uiScript.Show();
         }
 
     }
