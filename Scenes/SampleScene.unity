@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 83eef3f3bb8e1634d8f5d02ae7bfbf07, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.5918198, g: 0.5915519, b: 0.59150434, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -309,7 +309,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5949265739914962777, guid: 79b9a59673797416ca092b000fd39555, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 13.680786
+      value: 14.2
       objectReference: {fileID: 0}
     - target: {fileID: 5949265739914962777, guid: 79b9a59673797416ca092b000fd39555, type: 3}
       propertyPath: m_LocalPosition.y
@@ -351,6 +351,42 @@ PrefabInstance:
       propertyPath: predictPrefab
       value: 
       objectReference: {fileID: 5602632251979485116, guid: 04f303b9d638c49a8b2062a49195bd61, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[0]
+      value: 
+      objectReference: {fileID: 3940122974389570068, guid: 8b96bda2412194dfa94910dc01204c11, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[1]
+      value: 
+      objectReference: {fileID: 6797635016862173553, guid: 84632ad9278844a86ae03f428064072f, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[2]
+      value: 
+      objectReference: {fileID: 2485727104775641608, guid: 238253f06a02a44fbb6bac049590cf72, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[3]
+      value: 
+      objectReference: {fileID: 3940122974389570068, guid: 8b96bda2412194dfa94910dc01204c11, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[4]
+      value: 
+      objectReference: {fileID: 2132682483844519635, guid: c36203b25fb074d53bef0104fca9d372, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[5]
+      value: 
+      objectReference: {fileID: 3120685371275554894, guid: d956c9ea05ee84831a199d0cdd7a915c, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[6]
+      value: 
+      objectReference: {fileID: 298485766349274399, guid: a7fa67c6f57954f54bb490e3c2c5e8eb, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[7]
+      value: 
+      objectReference: {fileID: 6321380891718002767, guid: 5dc140eddf78d4ab7b23cbae648a4986, type: 3}
+    - target: {fileID: 5949265739914962778, guid: 79b9a59673797416ca092b000fd39555, type: 3}
+      propertyPath: blockPrefab.Array.data[8]
+      value: 
+      objectReference: {fileID: 3940122974389570068, guid: 8b96bda2412194dfa94910dc01204c11, type: 3}
     - target: {fileID: 5949265739914962779, guid: 79b9a59673797416ca092b000fd39555, type: 3}
       propertyPath: m_Name
       value: Map

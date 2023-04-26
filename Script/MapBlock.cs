@@ -11,28 +11,20 @@ public class MapBlock : MonoBehaviour {
     private int type; // 类型
     private Map mapScript; // Map脚本
     private Player playerScript; // 玩家脚本
-    private Player2 player1Script; // 玩家1脚本
-    // 颜色数组
-    private Color[] colors = new Color[9] {
-        Color.white,
-        Color.gray,
-        Color.green,
-        Color.blue,
-        Color.yellow,
-        Color.cyan,
-        Color.magenta,
-        Color.gray,
-        Color.black
-    };
+    // outline脚本
+    private Outline outlineScript;
 
     // Start is called before the first frame update
     void Start() {
-        // 根据type 设置颜色
-        transform.GetChild(0).GetComponent<Renderer>().material.color = colors[type];
         // 获取Map脚本(父脚本)
         mapScript = transform.parent.GetComponent<Map>();
         playerScript = mapScript.GetPlayer1Script();
-        player1Script = mapScript.GetPlayer2Script();
+        // 从子物体获取outline脚本
+        outlineScript = transform.GetChild(0).GetComponent<Outline>();
+        // 设置outline的颜色为黄色
+        outlineScript.OutlineColor = Color.yellow;
+        // 设置outline脚本的宽度
+        outlineScript.OutlineWidth = 0;
 
     }
 
@@ -44,8 +36,6 @@ public class MapBlock : MonoBehaviour {
     // 鼠标点击事件
     private void OnMouseDown()
     {
-        // 获取玩家状态
-        
         // 如果玩家正在移动，不执行
         if (mapScript.IsPlayerMoving())
         {
@@ -59,8 +49,8 @@ public class MapBlock : MonoBehaviour {
             {
                 // 将当前方块的序号存储到被选中的方块中
                 mapScript.SetSelectedBlock(index);
-                // 获取子物体, 渲染成红色
-                transform.GetChild(0).GetComponent<Renderer>().material.color = Color.red;
+                // 设置高亮
+                outlineScript.OutlineWidth = 10;
             }
         }
         else
@@ -74,18 +64,12 @@ public class MapBlock : MonoBehaviour {
                playerScript.MoveTo(index);
                 // 减少回合数
                 mapScript.ReduceRound();
+                // 取消选中
+                mapScript.RecoverSelectedBlock();
             }
-            // 将被选中的方块恢复颜色
-            mapScript.RecoverSelectedBlockColor();
         }
     }
-    
-    // 恢复颜色
-    public void RecoverColor()
-    {
-        transform.GetChild(0).GetComponent<Renderer>().material.color = colors[type];
-    }
-    
+
     // 设置基础信息
     public void SetBaseInfo(int index, int type)
     {
@@ -103,5 +87,11 @@ public class MapBlock : MonoBehaviour {
     public int GetBlockType()
     {
         return type;
+    }
+    
+    // 恢复高亮
+    public void RecoverOutline()
+    {
+        outlineScript.OutlineWidth = 0;
     }
 }

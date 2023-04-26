@@ -38,8 +38,6 @@ public class Player : MonoBehaviour
         // 获取副玩家脚本
         player2Script = mapScript.GetPlayer2Script();
         mapRing = mapScript.GetMapRing();
-        // 获取子物体，设置颜色为蓝色
-        SetColor(Color.blue);
     }
 
     // Update is called once per frame
@@ -62,7 +60,7 @@ public class Player : MonoBehaviour
             // 如果在翻转，调用翻转函数
             case 2:
             {
-                status = 0;
+                ReverseUpdate();
                 break;
             }
 
@@ -99,11 +97,13 @@ public class Player : MonoBehaviour
     // 加减事件
     public void AddOrSub(int num, bool isAdd)
     {
+        // 将当前位置的板块恢复类型
+        mapScript.ChangeBlockType(position, 0);
         // 如果是加事件
         if (isAdd)
         {
             // 将玩家2停止1回合
-            player2Script.SetFrozenRound(1);
+            player2Script.SetStopRound(1);
             // 玩家1移动num个位置
             MoveTo( mapScript.GetMod((position + num)));
         }
@@ -114,9 +114,6 @@ public class Player : MonoBehaviour
             // 玩家1移动num个位置
             MoveTo(mapScript.GetMod(position - num));
         }
-        
-        // 将当前位置的板块恢复类型
-        mapScript.ChangeBlockType(position, 0);
     }
     
     // 替换事件
@@ -137,10 +134,13 @@ public class Player : MonoBehaviour
     }
     
     // 翻转事件
-    public void Reverse()
+    public void Reverse(bool isBlock = false)
     {
         // 将当前位置的板块恢复类型
-        mapScript.ChangeBlockType(position, 0);
+        if (isBlock)
+        {
+            mapScript.ChangeBlockType(position, 0);
+        }
         int lastPosition = position;
         // 获取对面位置
         position = mapScript.GetOppositePosition(position);
@@ -157,8 +157,8 @@ public class Player : MonoBehaviour
         // 如果玩家2在当前位置，触发翻转
         if (player2Script.GetPosition() == position)
         {
-            Reverse();
-            return;
+            Reverse(false);
+            TriggerEvent();
         }
         // 通过当前位置的板块类型判断触发事件
         switch (mapBlocks[position].GetBlockType())
@@ -186,15 +186,22 @@ public class Player : MonoBehaviour
             case 6:
                 // 替换事件，将玩家2和玩家1的位置互换
                 Replace();
+                TriggerEvent();
                 break;
             case 7:
                 // 翻转事件，将玩家1翻转
-                Reverse();
+                Reverse(true);
+                TriggerEvent();
                 break;
             case 8:
                 break;
             case 9:
                 break;
+        }
+
+        if (mapBlocks[position].GetBlockType() != 1)
+        {
+            mapScript.CheckLose();
         }
     }
     
@@ -281,11 +288,14 @@ public class Player : MonoBehaviour
             }
             flag = false;
             nowAngle = angle;
+            speed = 0;
         }
-        if (Mathf.Abs(targetAngle - nowAngle) > 0.01)
+        if (Mathf.Abs(targetAngle - nowAngle) > 0.01 && speed >= 0)
         {
+            // 朝向
+            bool isForward = targetAngle > nowAngle;
             // 计算当前角度
-            if (targetAngle > nowAngle)
+            if (isForward)
             {
                 nowAngle += speed * Time.deltaTime;
                 if (nowAngle > (angle + targetAngle) / 2)
@@ -311,7 +321,15 @@ public class Player : MonoBehaviour
             }
 
             transform.localPosition = mapRing.GetPositionOnMobiusRing(nowAngle % (Mathf.PI * 2));
-            transform.localRotation = mapScript.GetRotationByAngle(nowAngle % (Mathf.PI * 4));
+            // 前进的时候按照速度朝前倾斜
+            if (isForward)
+            {
+                transform.localRotation = mapScript.GetRotationByAngle(nowAngle % (Mathf.PI * 4)) * Quaternion.Euler(0, 0, speed * 20);
+            }
+            else
+            {
+                transform.localRotation = mapScript.GetRotationByAngle(nowAngle % (Mathf.PI * 4)) * Quaternion.Euler(0, 0, -speed * 20);
+            }
         }
         else
         {
@@ -322,6 +340,51 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void ReverseUpdate()
+    {
+        // 初始化
+        if (flag)
+        {
+            speed = 0;
+            nowAngle = 180;
+            flag = false;
+        }
+
+        if (Mathf.Abs(nowAngle) > 0.1 && speed >= 0)
+        {
+            // 当前角度为当前位置的角度+nowAngle
+            nowAngle -= speed * Time.deltaTime;
+            transform.localRotation = mapBlocks[position].transform.localRotation * Quaternion.Euler(nowAngle, 0, 0);
+            if (nowAngle > 90)
+            {
+                speed += acceleration * Time.deltaTime * 300;
+            }
+            else
+            {
+                speed -= acceleration * Time.deltaTime * 300;
+            }
+            // 当前本地高度为当前位置的高度+(180 - nowAngle)*(nowAngle)/180
+            transform.localPosition = mapBlocks[position].transform.localPosition + new Vector3(0, (180 - nowAngle) * (nowAngle) * 0.0001f, 0);
+        }
+        else
+        {
+            status = 0;
+            flag = true;
+            TriggerEvent();
+        }
+
+    }
+    //获取玩家当前位置的块的脚本
+    public MapBlock GetMapBlock()
+    {
+        return mapBlocks[position];
+    }
+    
+    // 获取当前板块类型
+    public int GetBlockType()
+    {
+        return mapBlocks[position].GetBlockType();
+    }
 
 
 }

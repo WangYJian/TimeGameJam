@@ -28,8 +28,10 @@ public class CameraView : MonoBehaviour
     public bool isRight;
 
 
-    void Start()
+    public void Init()
     {
+        // 视角方向回到原点
+        transform.localRotation = Quaternion.Euler(30, -90, 0);
         // 位置绑定到指定物体距离指定距离的位置
         transform.position = target.transform.position - transform.forward * distance;
         // 镜头朝向物体
@@ -37,8 +39,8 @@ public class CameraView : MonoBehaviour
         // 获取Map脚本
         mapScript = GameObject.Find("Map").GetComponent<Map>();
         playerScript = mapScript.GetPlayer1Script();
-        angle = 90;
-       
+        angle = 0;
+        // 视角移到玩家方向
     }
 
     // Update is called once per frame
@@ -75,19 +77,19 @@ public class CameraView : MonoBehaviour
             // 计算垂直旋转角度
             float verticalAngle = y * speed * Time.fixedDeltaTime;
             // 绕x轴旋转和绕y轴旋转
-            transform.RotateAround(target.transform.position, transform.right, -verticalAngle);
+            // x轴限制-40~40
+            float temp = transform.rotation.eulerAngles.x - verticalAngle;
+            if (temp <= 40 || (temp >= 320))
+            {
+                transform.RotateAround(target.transform.position, transform.right, -verticalAngle);
+            }
             transform.RotateAround(target.transform.position, Vector3.up, rotateAngle);
             // 计算相机角度
             angle = (rotateAngle + angle) % 720;
-        }
-        // 检测鼠标滚轮输入，按照滚轮输入改变相机距离
-        if (Input.GetAxis("Mouse ScrollWheel") > 0)
-        {
-            distance -= 1;
-        }
-        if (Input.GetAxis("Mouse ScrollWheel") < 0)
-        {
-            distance += 1;
+            if (angle < 0)
+            {
+                angle += 720;
+            }
         }
         // 设置相机位置
         transform.position = target.transform.position - transform.forward * distance;
@@ -98,17 +100,16 @@ public class CameraView : MonoBehaviour
     {
         if (isMoving)
         {
-            playerScript.UpdatePosition();
             // 设置当前Map的旋转角度为当前角度
             mapScript.SetAngle(angle);
-            // 如果玩家的绝对位置朝上，则停止移动
-            float rotation = playerScript.transform.rotation.eulerAngles.x;
+            // 如果玩家站的方块不是向上，则继续旋转
+            float rotation = playerScript.GetMapBlock().transform.rotation.eulerAngles.x;
             if (rotation > 180)
             {
                 rotation = Mathf.Abs(rotation - 360);
             }
 
-            if (Mathf.Abs(rotation) < 20 && Mathf.Abs(playerScript.transform.rotation.eulerAngles.z - 180) >= 10)
+            if (Mathf.Abs(rotation) < 20 && Mathf.Abs(playerScript.GetMapBlock().transform.rotation.eulerAngles.z - 180) >= 10)
             {
                 isMoving = false;
             }
