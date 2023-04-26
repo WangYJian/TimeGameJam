@@ -27,6 +27,7 @@ namespace Script {
     {
         private bool isWin = false;
         private bool isLose = false; //胜利事件
+        private bool isUI = true; // 是否显示UI
         private int maxRound = 10; // 最大回合数
         private int nowRound = 0; // 当前回合数
         private int mapSize = 15; // 地图的格数
@@ -46,6 +47,7 @@ namespace Script {
         private MobiusRing mapRing; // 莫比乌斯环对象
         private MapSettings mapSettings; // 地图设置
         private int level = 0; // 关卡
+        private float endTime = 0;
         // UI预制体
         public GameObject[] uiPrefab;
 
@@ -172,17 +174,26 @@ namespace Script {
                 }
                 RotateMap();
             }
-
-            // 检查是否胜利或失败
-            if (isWin)
+            if (isWin || isLose)
             {
-                // 胜利
-                Debug.Log("胜利");
+                if (isUI)
+                {
+                    ShowUI(level);
+                    isUI = false;
+                }
             }
-            else if (isLose)
+
+            if (isWin && Time.time > endTime)
             {
-                // 失败
-                Debug.Log("失败");
+                ChangeMapInfo(level);
+                isWin = false;
+                isUI = true;
+            }
+            if (isLose && Time.time > endTime)
+            {
+                ChangeMapInfo(level);
+                isLose = false;
+                isUI = true;
             }
         }
 
@@ -253,13 +264,15 @@ namespace Script {
         public void Win()
         {
             level++;
-            ChangeMapInfo(level);
+            isWin = true;
+            endTime = Time.time + 0.5f;
         }
 
         // 失败
         public void GameOver()
         {
-            ChangeMapInfo(level);
+            isLose = true;
+            endTime = Time.time + 0.5f;
         }
 
         // 对距离求补
@@ -430,11 +443,17 @@ namespace Script {
         public void ShowUI(int level)
         {
             // 创建UI
-            GameObject ui = Instantiate(uiPrefab[level + 1], transform);
+            GameObject ui = Instantiate(uiPrefab[level + 1]);
             // 获取UI脚本
             PanleSetting uiScript = ui.GetComponent<PanleSetting>();
-            // 显示
-            uiScript.Show();
+            if (level == -1)
+            {
+                uiScript.ShowDirect();
+            }
+            else
+            {
+                uiScript.Show();
+            }
         }
 
     }

@@ -310,11 +310,6 @@ public class Player2 : MonoBehaviour
             case 9:
                 break;
         }
-
-        if (mapBlocks[position].GetBlockType() != 1)
-        {
-            mapScript.CheckLose();
-        }
     }
 
     public void ReverseUpdate()

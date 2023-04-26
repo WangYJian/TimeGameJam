@@ -9,6 +9,7 @@ public class PanleSetting : MonoBehaviour
     private UnityEngine.UI.Image selfImage; // 获取自己的Image组件
     private bool isLighting = false; // 是否正在变亮
     private float speed = 0.001f; // 变化速度
+    private bool flag = false; // 是否正在变化
     // Update is called once per frame
 
 
@@ -25,11 +26,16 @@ public class PanleSetting : MonoBehaviour
         Canvas canvas = GetComponentInParent<Canvas>();
         // 绑定相机
         canvas.worldCamera = Camera.main;
-        isShow = false;
+        isShow = true;
     }
 
     void Update()
     {
+        if (flag)
+        {
+            selfImage.color = new Color(selfImage.color.r, selfImage.color.g, selfImage.color.b, 1);
+            flag = false;
+        }
         if (isChanging)
         {
             if (isShow)
@@ -37,20 +43,19 @@ public class PanleSetting : MonoBehaviour
                 if (isLighting)
                 {
                     // 如果正在变亮，增加子物体的alpha值
-                    childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, childImage.color.a + speed * Time.deltaTime);
+                    childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, childImage.color.a + speed * Time.fixedTime);
                     // 如果子物体的alpha值大于0.9，则停止变换
                     if (childImage.color.a > 0.9f)
                     {
                         childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, 1);
                         selfImage.color = new Color(selfImage.color.r, selfImage.color.g, selfImage.color.b, 1);
-                        Debug.Log(1);
                         isLighting = false;
                     }
                 }
                 else
                 {
                     // 如果正在变暗，减少子物体的alpha值
-                    childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, childImage.color.a - speed * Time.deltaTime);
+                    childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, childImage.color.a - speed * Time.fixedTime);
                     // 如果子物体的alpha值小于0.1，则停止变换
                     if (childImage.color.a < 0.1f)
                     {
@@ -64,7 +69,7 @@ public class PanleSetting : MonoBehaviour
                 if (isLighting)
                 {
                     // 如果正在变亮，增加子物体的alpha值
-                    childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, childImage.color.a + speed);
+                    childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, childImage.color.a + speed * Time.fixedTime);
                     // 如果子物体的alpha值大于0.9，则停止变换
                     if (childImage.color.a > 0.9f)
                     {
@@ -76,13 +81,15 @@ public class PanleSetting : MonoBehaviour
                 else
                 {
                     // 如果正在变暗，减少子物体的alpha值
-                    childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, childImage.color.a - speed);
+                    childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, childImage.color.a - speed * Time.fixedTime);
                     // 如果子物体的alpha值小于0.1，则停止变换
                     if (childImage.color.a < 0.1f)
                     {
                         childImage.color = new Color(childImage.color.r, childImage.color.g, childImage.color.b, 0);
                         isChanging = false;
                         isShow = true;
+                        // 摧毁自己
+                        Destroy(gameObject);
                     }
                 }
             }
@@ -106,5 +113,11 @@ public class PanleSetting : MonoBehaviour
         isChanging = true;
         isShow = true;
         isLighting = true;
+    }
+    
+    // 直接显示
+    public void ShowDirect()
+    {
+        flag = true;
     }
 }

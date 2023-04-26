@@ -11,6 +11,10 @@ public class MapBlock : MonoBehaviour {
     private int type; // 类型
     private Map mapScript; // Map脚本
     private Player playerScript; // 玩家脚本
+
+    public AudioClip[] AudioClips; // 音效数组，1为点击，2为移动，3为成功, 4为失败
+
+    private AudioSource audioSource; // 音效播放器
     // outline脚本
     private Outline outlineScript;
 
@@ -25,12 +29,13 @@ public class MapBlock : MonoBehaviour {
         outlineScript.OutlineColor = Color.yellow;
         // 设置outline脚本的宽度
         outlineScript.OutlineWidth = 0;
-
+        // 获取音效播放器
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     void Update() {
-
+        
     }
     
     // 鼠标点击事件
@@ -51,6 +56,9 @@ public class MapBlock : MonoBehaviour {
                 mapScript.SetSelectedBlock(index);
                 // 设置高亮
                 outlineScript.OutlineWidth = 10;
+                // 播放音效
+                audioSource.clip = AudioClips[0];
+                audioSource.Play();
             }
         }
         else
@@ -66,6 +74,9 @@ public class MapBlock : MonoBehaviour {
                 mapScript.ReduceRound();
                 // 取消选中
                 mapScript.RecoverSelectedBlock();
+                // 播放音效
+                audioSource.clip = AudioClips[1];
+                audioSource.Play();
             }
         }
     }

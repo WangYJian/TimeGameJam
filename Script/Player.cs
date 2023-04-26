@@ -376,7 +376,6 @@ public class Player : MonoBehaviour
     //获取玩家当前位置的块的脚本
     public MapBlock GetMapBlock()
     {
-        Debug.Log(position);
         return mapBlocks[position];
     }
     
